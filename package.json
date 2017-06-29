@@ -1,5 +1,5 @@
 {
-  "name": "serverless-local-http-server",
+  "name": "serverless-local-dev-server",
   "version": "0.1.0",
   "engines": {
     "node": ">=6.0"
@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DieProduktMacher/serverless-local-http-server"
+    "url": "https://github.com/DieProduktMacher/serverless-local-dev-server"
   },
   "keywords": [
     "serverless",
