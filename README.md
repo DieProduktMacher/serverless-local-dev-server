@@ -37,7 +37,7 @@ functions:
     handler: handler.hello
     events:
       - alexaSkill
-      - http: GET /
+      - http: GET /hello
 
 # Add serverless-local-dev-server to your plugins:
 plugins:
