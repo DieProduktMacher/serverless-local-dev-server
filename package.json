@@ -1,0 +1,44 @@
+{
+  "name": "serverless-local-http-server",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=6.0"
+  },
+  "description": "Develop Alexa-Skill and HTTP functions in Serverless without deploying to AWS",
+  "author": "DieProduktMacher <www.dieproduktmacher.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DieProduktMacher/serverless-local-http-server"
+  },
+  "keywords": [
+    "serverless",
+    "serverless-plugin",
+    "alexa",
+    "alexa-skill",
+    "http",
+    "development",
+    "dev",
+    "local",
+    "aws-lambda"
+  ],
+  "main": "src/index.js",
+  "scripts": {
+    "test": "nyc mocha",
+    "lint": "standard"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3"
+  },
+  "devDependencies": {
+    "chai": "^4.0.0",
+    "chai-as-promised": "^7.0.0",
+    "mocha": "^3.4.2",
+    "node-fetch": "^1.7.1",
+    "nyc": "^10.3.2",
+    "serverless": "^1.14.0",
+    "sinon": "^2.3.2",
+    "standard": "^10.0.2"
+  }
+}
