@@ -9,7 +9,7 @@ Supported features:
 
 * Expose `alexa-skill` and `http` events as local HTTP endpoints
 * Environment variables
-* Very basic HTTP integration
+* Basic HTTP integration
 * Auto reload via nodemon (see *How To*)
 
 This package requires node >= 6.0
