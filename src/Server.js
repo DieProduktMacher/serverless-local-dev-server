@@ -77,12 +77,15 @@ class Server {
   // Loads and executes the Lambda handler
   _executeLambdaHandler (func, event) {
     return new Promise((resolve, reject) => {
+      // Set new environment variables
+      Object.assign(process.env, { IS_LOCAL: true }, func.environment)
+
       // Load function and variables
       let handle = require(func.handlerModulePath)[func.handlerFunctionName]
       let context = { succeed: resolve, fail: reject }
       let callback = (error, result) => (!error) ? resolve(result) : reject(error)
-      // Set new environment variables, execute handler function
-      Object.assign(process.env, { IS_LOCAL: true }, func.environment)
+
+      // Execute it!
       handle(event, context, callback)
     })
   }
