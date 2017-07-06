@@ -128,6 +128,7 @@ describe('index.js', () => {
       expect(result.ok).equal(true)
       return result.json()
     }).then(json => {
+      expect(json.IS_LOCAL).equal('true')
       expect(json.foo).equal('baz')
       expect(json.bla).equal('blub')
     })
