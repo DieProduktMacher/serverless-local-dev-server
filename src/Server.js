@@ -8,7 +8,6 @@ const getEndpoints = require('./endpoints/get')
 class Server {
   constructor () {
     this.functions = []
-    this.defaultEnvironment = Object.assign({}, process.env)
     this.log = console.log
   }
   // Starts the server
@@ -83,9 +82,8 @@ class Server {
       let context = { succeed: resolve, fail: reject }
       let callback = (error, result) => (!error) ? resolve(result) : reject(error)
       // Set new environment variables, execute handler function
-      process.env = Object.assign({ IS_OFFLINE: true }, func.environment, this.defaultEnvironment)
+      Object.assign(process.env, { IS_LOCAL: true }, func.environment)
       handle(event, context, callback)
-      process.env = Object.assign({}, this.defaultEnvironment)
     })
   }
 }
