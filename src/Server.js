@@ -9,6 +9,7 @@ class Server {
   constructor () {
     this.functions = []
     this.log = console.log
+    this.customEnvironment = {}
   }
   // Starts the server
   start (port) {
@@ -78,7 +79,7 @@ class Server {
   _executeLambdaHandler (func, event) {
     return new Promise((resolve, reject) => {
       // Set new environment variables
-      Object.assign(process.env, { IS_LOCAL: true }, func.environment)
+      Object.assign(process.env, func.environment, this.customEnvironment)
 
       // Load function and variables
       let handle = require(func.handlerModulePath)[func.handlerFunctionName]
