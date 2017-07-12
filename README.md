@@ -3,7 +3,7 @@ Serverless Local Dev Server Plugin (Beta)
 
 [![Build Status](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server.svg?branch=develop)](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server)
 
-This plugin exposes your Alexa-Skill and HTTP functions as local HTTP endpoints, removing the need to deploy every change to AWS Lambda. You can connect these endpoints to Alexa or services like Messenger Bots via forwardhq, ngrok or any other forwarding tool.
+This plugin exposes Alexa-Skill and HTTP events as local HTTP endpoints, removing the need to deploy every code change to AWS Lambda. You can connect these endpoints to Alexa, Facebook Messenger or other services via forwardhq, ngrok or any other forwarding service.
 
 Supported features:
 

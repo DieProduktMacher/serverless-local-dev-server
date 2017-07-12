@@ -13,7 +13,7 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 describe('index.js', () => {
-  var sandbox, serverless, alexaDevServer
+  var sandbox, serverless, options, alexaDevServer
 
   const sendAlexaRequest = (port, name) => {
     return fetch(`http://localhost:${port}/alexa-skill/${name}`, {
@@ -43,7 +43,6 @@ describe('index.js', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create()
-
     serverless = new Serverless()
     serverless.init()
     serverless.setProvider('aws', new AwsProvider(serverless))
@@ -76,6 +75,7 @@ describe('index.js', () => {
       }
     }
     alexaDevServer = new AlexaDevServer(serverless)
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return Promise.all([
       sendAlexaRequest(5005, 'MyAlexaSkill').then(result =>
@@ -102,6 +102,7 @@ describe('index.js', () => {
       }
     }
     alexaDevServer = new AlexaDevServer(serverless, { port: 5006 })
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return sendHttpGetRequest(5006, '').then(result =>
       expect(result.ok).equal(true)
@@ -111,7 +112,8 @@ describe('index.js', () => {
   it('should set environment variables correctly', () => {
     serverless.service.provider.environment = {
       foo: 'bar',
-      bla: 'blub'
+      bla: 'blub',
+      la: 'la'
     }
     serverless.service.functions = {
       'MyAlexaSkill': {
@@ -122,7 +124,12 @@ describe('index.js', () => {
         }
       }
     }
-    alexaDevServer = new AlexaDevServer(serverless, { port: 5007 })
+    let options = {
+      environment: { la: 'lala' },
+      port: 5007
+    }
+    alexaDevServer = new AlexaDevServer(serverless, options)
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return sendAlexaRequest(5007, 'MyAlexaSkill').then(result => {
       expect(result.ok).equal(true)
@@ -131,6 +138,7 @@ describe('index.js', () => {
       expect(json.IS_LOCAL).equal('true')
       expect(json.foo).equal('baz')
       expect(json.bla).equal('blub')
+      expect(json.la).equal('lala')
     })
   })
 
@@ -142,6 +150,7 @@ describe('index.js', () => {
       }
     }
     alexaDevServer = new AlexaDevServer(serverless, { port: 5008 })
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     // Expect rejection of request as no server is running on port 5008
     return expect(sendAlexaRequest(5008)).to.be.rejected
@@ -159,6 +168,7 @@ describe('index.js', () => {
       }
     }
     alexaDevServer = new AlexaDevServer(serverless, { port: 5009 })
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return Promise.all([
       sendAlexaRequest(5009).then(result =>
