@@ -2,7 +2,7 @@
 
 const Server = require('./Server.js')
 
-class ServerlessPlugin {
+class ServerlessLocalDevServerPlugin {
   constructor (serverless, options) {
     this.serverless = serverless
     this.options = options || {}
@@ -36,4 +36,4 @@ class ServerlessPlugin {
   }
 }
 
-module.exports = ServerlessPlugin
+module.exports = ServerlessLocalDevServerPlugin
