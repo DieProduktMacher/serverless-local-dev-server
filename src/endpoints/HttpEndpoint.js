@@ -18,7 +18,8 @@ class HttpEndpoint extends Endpoint {
     return {
       httpMethod: request.method,
       body: JSON.stringify(request.body, null, '  '),
-      queryStringParameters: request.query
+      queryStringParameters: request.query,
+      pathParameters: request.params || {}
     }
   }
   handleLambdaSuccess (response, result) {
