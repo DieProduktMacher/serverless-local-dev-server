@@ -13,7 +13,7 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 describe('index.js', () => {
-  var sandbox, serverless, options, alexaDevServer
+  let sandbox, serverless, alexaDevServer
 
   const sendAlexaRequest = (port, name) => {
     return fetch(`http://localhost:${port}/alexa-skill/${name}`, {
@@ -69,6 +69,10 @@ describe('index.js', () => {
         handler: 'lambda-handler.httpGet',
         events: [ { http: { method: 'GET', path: '/' } } ]
       },
+      'MyHttpResourceID': {
+        handler: 'lambda-handler.httpGet',
+        events: [ { http: { method: 'GET', path: '/:id' } } ]
+      },
       'MyShorthandHttpResource': {
         handler: 'lambda-handler.httpPost',
         events: [ { http: 'POST shorthand' } ]
@@ -86,6 +90,13 @@ describe('index.js', () => {
         return result.json().then(json => {
           expect(json.queryStringParameters.a).equal('b')
           expect(json.queryStringParameters.c).equal('d')
+          expect(json.pathParameters).eql({})
+        })
+      }),
+      sendHttpGetRequest(5005, '12345').then(result => {
+        expect(result.status).equal(200)
+        return result.json().then(json => {
+          expect(json.pathParameters.id).eql('12345')
         })
       }),
       sendHttpPostRequest(5005, 'shorthand', {}).then(result => {
