@@ -3,6 +3,7 @@
 const Express = require('express')
 const BodyParser = require('body-parser')
 const path = require('path')
+const dotenv = require('dotenv')
 const getEndpoints = require('./endpoints/get')
 
 class Server {
@@ -10,6 +11,8 @@ class Server {
     this.functions = []
     this.log = console.log
     this.customEnvironment = {}
+    // copy initial process.env
+    this.processEnvironment = Object.assign({}, process.env)
   }
   // Starts the server
   start (port) {
@@ -37,14 +40,14 @@ class Server {
   // Sets functions, including endpoints, using the serverless config and service path
   setFunctions (serverlessConfig, servicePath) {
     this.functions = Object.keys(serverlessConfig.functions).map(name => {
-      let functionConfig = serverlessConfig.functions[name]
-      let handlerParts = functionConfig.handler.split('.')
+      const functionConfig = serverlessConfig.functions[name]
+      const [handlerSrcFile, handlerFunctionName] = functionConfig.handler.split('.')
       return {
         name: name,
         config: serverlessConfig.functions[name],
-        handlerModulePath: path.join(servicePath, handlerParts[0]),
-        handlerFunctionName: handlerParts[1],
-        environment: Object.assign({}, serverlessConfig.provider.environment, functionConfig.environment)
+        handlerModulePath: path.join(servicePath, handlerSrcFile),
+        handlerFunctionName,
+        environment: Object.assign({}, serverlessConfig.provider.environment, functionConfig.environment, this.customEnvironment)
       }
     }).map(func =>
       Object.assign({}, func, { endpoints: getEndpoints(func) })
@@ -78,13 +81,13 @@ class Server {
   // Loads and executes the Lambda handler
   _executeLambdaHandler (func, event) {
     return new Promise((resolve, reject) => {
-      // Set new environment variables
-      Object.assign(process.env, func.environment, this.customEnvironment)
-
-      // Load function and variables
-      let handle = require(func.handlerModulePath)[func.handlerFunctionName]
-      let context = { succeed: resolve, fail: reject }
-      let callback = (error, result) => (!error) ? resolve(result) : reject(error)
+      // Load local development environment variables
+      const localEnvironment = dotenv.config({path: '.env.local'}).parsed
+      // set process.env explicitly
+      process.env = Object.assign({}, this.processEnvironment, func.environment, localEnvironment)
+      const handle = require(func.handlerModulePath)[func.handlerFunctionName]
+      const context = { succeed: resolve, fail: reject }
+      const callback = (error, result) => (!error) ? resolve(result) : reject(error)
 
       // Execute it!
       handle(event, context, callback)
