@@ -1,6 +1,6 @@
 {
   "name": "serverless-local-dev-server",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "engines": {
     "node": ">=6.0"
   },
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
     "express": "^4.15.3"
   },
   "devDependencies": {
