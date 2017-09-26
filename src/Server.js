@@ -9,6 +9,7 @@ const getEndpoints = require('./endpoints/get')
 class Server {
   constructor () {
     this.functions = []
+    this.staticFolder = false
     this.log = console.log
     this.customEnvironment = {}
     // copy initial process.env
@@ -25,6 +26,9 @@ class Server {
     this.functions.forEach(func =>
       func.endpoints.forEach(endpoint => this._attachEndpoint(func, endpoint))
     )
+    if (this.staticFolder) {
+      this.app.use('/static', Express.static(this.staticFolder))
+    }
     this.app.listen(port, _ => {
       this.log(`Listening on port ${port} for requests 🚀`)
       this.log('----')
@@ -34,11 +38,16 @@ class Server {
           this.log(`  ${endpoint.method} http://localhost:${port}${endpoint.path}`)
         })
       })
+      if (this.staticFolder) {
+        this.log(`StaticFolder`)
+        this.log(`  GET http://localhost:${port}/static (${this.staticFolder})`)
+        this.app.use('/static', Express.static(this.staticFolder))
+      }
       this.log('----')
     })
   }
   // Sets functions, including endpoints, using the serverless config and service path
-  setFunctions (serverlessConfig, servicePath) {
+  setConfiguration (serverlessConfig, servicePath) {
     this.functions = Object.keys(serverlessConfig.functions).map(name => {
       const functionConfig = serverlessConfig.functions[name]
       const [handlerSrcFile, handlerFunctionName] = functionConfig.handler.split('.')
@@ -54,6 +63,9 @@ class Server {
     ).filter(func =>
       func.endpoints.length > 0
     )
+    if (serverlessConfig.custom.localDevStaticFolder) {
+      this.staticFolder = path.join(servicePath, serverlessConfig.custom.localDevStaticFolder)
+    }
   }
   // Attaches HTTP endpoint to Express
   _attachEndpoint (func, endpoint) {
