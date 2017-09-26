@@ -153,7 +153,7 @@ describe('index.js', () => {
     })
   })
 
-  it('should not start a server if supported events are specified', () => {
+  it('should not start a server if no supported events are specified', () => {
     serverless.service.functions = {
       'SomeFunction': {
         handler: 'lambda-handler.none',
