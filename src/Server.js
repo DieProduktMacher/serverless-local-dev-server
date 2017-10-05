@@ -94,7 +94,10 @@ class Server {
   _executeLambdaHandler (func, event) {
     return new Promise((resolve, reject) => {
       // Load local development environment variables
-      const localEnvironment = dotenv.config({path: '.env.local'}).parsed
+      const localEnvironment = Object.assign({},
+        dotenv.config({path: '.env.local'}).parsed,
+        dotenv.config({path: '.local.env'}).parsed,
+        dotenv.config({path: 'local.env'}).parsed)
       // set process.env explicitly
       process.env = Object.assign({}, this.processEnvironment, func.environment, localEnvironment)
       const handle = require(func.handlerModulePath)[func.handlerFunctionName]
