@@ -43,7 +43,7 @@ functions:
 
 # Add serverless-local-dev-server to your plugins:
 plugins:
-  - serverless-local-dev-server
+  - "@kalarrs/serverless-local-dev-server"
 
 # if needed add folder for serving static files if necessary (relative to service path)
 custom:
