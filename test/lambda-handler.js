@@ -36,7 +36,7 @@ module.exports.httpGet = (request, context) => {
     context.fail(new Error('body should be empty'))
   } else {
     context.succeed({
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       statusCode: 200,
       body: request
     })

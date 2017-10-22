@@ -8,12 +8,13 @@ class HttpEndpoint extends Endpoint {
     super(httpConfig, func)
     if (typeof httpConfig === 'string') {
       let s = httpConfig.split(' ')
-      httpConfig = { method: s[0], path: s[1] }
+      httpConfig = {method: s[0], path: s[1]}
     }
     this.method = httpConfig.method
     this.resourcePath = httpConfig.path.replace(/\{([a-zA-Z_]+)\}/g, ':$1')
     this.path = path.join('/http', this.resourcePath)
   }
+
   getLambdaEvent (request) {
     return {
       httpMethod: request.method,
@@ -22,6 +23,7 @@ class HttpEndpoint extends Endpoint {
       pathParameters: request.params || {}
     }
   }
+
   handleLambdaSuccess (response, result) {
     if (result.headers) {
       response.set(result.headers)
@@ -29,6 +31,7 @@ class HttpEndpoint extends Endpoint {
     response.status(result.statusCode)
     response.send(result.body === 'object' ? JSON.stringify(result.body) : result.body)
   }
+
   toString () {
     return `HTTP: ${this.method} ${this.resourcePath}`
   }

@@ -15,6 +15,7 @@ class Server {
     // copy initial process.env
     this.processEnvironment = Object.assign({}, process.env)
   }
+
   // Starts the server
   start (port) {
     if (this.functions.length === 0) {
@@ -29,7 +30,7 @@ class Server {
     if (this.staticFolder) {
       this.app.use('/static', Express.static(this.staticFolder))
     }
-    this.app.listen(port, _ => {
+    this.server = this.app.listen(port, _ => {
       this.log(`Listening on port ${port} for requests 🚀`)
       this.log('----')
       this.functions.forEach(func => {
@@ -46,20 +47,24 @@ class Server {
       this.log('----')
     })
   }
+
   // Sets functions, including endpoints, using the serverless config and service path
   setConfiguration (serverlessConfig, servicePath) {
     this.functions = Object.keys(serverlessConfig.functions).map(name => {
       const functionConfig = serverlessConfig.functions[name]
       const [handlerSrcFile, handlerFunctionName] = functionConfig.handler.split('.')
+      let handlerPath = Array.isArray(serverlessConfig.plugins) && serverlessConfig.plugins.includes('serverless-webpack')
+        ? path.join(servicePath, '/.webpack/service', handlerSrcFile)
+        : path.join(servicePath, handlerSrcFile)
       return {
         name: name,
         config: serverlessConfig.functions[name],
-        handlerModulePath: path.join(servicePath, handlerSrcFile),
+        handlerModulePath: handlerPath,
         handlerFunctionName,
         environment: Object.assign({}, serverlessConfig.provider.environment, functionConfig.environment, this.customEnvironment)
       }
     }).map(func =>
-      Object.assign({}, func, { endpoints: getEndpoints(func) })
+      Object.assign({}, func, {endpoints: getEndpoints(func)})
     ).filter(func =>
       func.endpoints.length > 0
     )
@@ -67,6 +72,7 @@ class Server {
       this.staticFolder = path.join(servicePath, serverlessConfig.custom.localDevStaticFolder)
     }
   }
+
   // Attaches HTTP endpoint to Express
   _attachEndpoint (func, endpoint) {
     // Validate method and path
@@ -90,6 +96,7 @@ class Server {
       })
     })
   }
+
   // Loads and executes the Lambda handler
   _executeLambdaHandler (func, event) {
     return new Promise((resolve, reject) => {
@@ -101,7 +108,7 @@ class Server {
       // set process.env explicitly
       process.env = Object.assign({}, this.processEnvironment, func.environment, localEnvironment)
       const handle = require(func.handlerModulePath)[func.handlerFunctionName]
-      const context = { succeed: resolve, fail: reject }
+      const context = {succeed: resolve, fail: reject}
       const callback = (error, result) => (!error) ? resolve(result) : reject(error)
 
       // Execute it!
