@@ -1,7 +1,9 @@
-Serverless Local Dev Server Plugin (Beta)
-=======
+Serverless Local Dev Server Plugin With Multi Project Support
+=============================================================
 
-[![Build Status](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server.svg?branch=develop)](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server)
+[![Build Status](https://travis-ci.org/exocom/serverless-local-dev-server.svg)](https://travis-ci.org/exocom/serverless-local-dev-server)
+
+### This is a fork of the Local Dev Server Plugin from  [DieProduktMacher/serverless-local-dev-server](https://github.com/DieProduktMacher/serverless-local-dev-server)
 
 This plugin exposes Alexa-Skill and HTTP events as local HTTP endpoints, removing the need to deploy every code change to AWS Lambda. You can connect these endpoints to Alexa, Facebook Messenger or other services via forwardhq, ngrok or any other forwarding service.
 
@@ -20,7 +22,7 @@ This package requires node >= 6.0
 ### 1. Install the plugin
 
 ```sh
-npm install serverless-local-dev-server --save-dev
+npm install @kalarrs/serverless-local-dev-server --save-dev
 ```
 
 ### 2. Add the plugin to your serverless configuration file
@@ -95,4 +97,3 @@ As method for SSL Certificate validation select *My development endpoint is a su
 
 Licensed under the MIT license.
 
-Created and maintained by [DieProduktMacher](http://www.dieproduktmacher.com).
