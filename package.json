@@ -1,15 +1,15 @@
 {
-  "name": "serverless-local-dev-server",
-  "version": "0.2.4",
+  "name": "@kalarrs/serverless-local-dev-server",
+  "version": "1.0.0-beta.0",
   "engines": {
     "node": ">=6.0"
   },
   "description": "Develop Alexa-Skill and HTTP functions in Serverless without deploying to AWS",
-  "author": "DieProduktMacher <www.dieproduktmacher.com>",
+  "author": "Kalarrs Topham",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DieProduktMacher/serverless-local-dev-server"
+    "url": "https://github.com/exocom/serverless-local-dev-server"
   },
   "keywords": [
     "serverless",
