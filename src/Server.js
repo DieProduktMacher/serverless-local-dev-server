@@ -68,7 +68,7 @@ class Server {
     ).filter(func =>
       func.endpoints.length > 0
     )
-    if (serverlessConfig.custom.localDevStaticFolder) {
+    if (serverlessConfig.custom && serverlessConfig.custom.localDevStaticFolder) {
       this.staticFolder = path.join(servicePath, serverlessConfig.custom.localDevStaticFolder)
     }
   }

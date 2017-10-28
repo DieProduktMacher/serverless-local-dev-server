@@ -45,9 +45,10 @@ describe('index.js', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create()
     serverless = new Serverless()
-    serverless.init()
-    serverless.setProvider('aws', new AwsProvider(serverless))
-    serverless.config.servicePath = __dirname
+    return serverless.init().then(() => {
+      serverless.setProvider('aws', new AwsProvider(serverless))
+      serverless.config.servicePath = __dirname
+    })
   })
 
   afterEach((done) => {
@@ -207,5 +208,40 @@ describe('index.js', () => {
     alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     expect(alexaDevServer.server.functions[0].handlerModulePath).equal(expectedPath)
+  })
+
+  it('should host static files if the config is present', () => {
+    let expectedPath = path.join(__dirname, '/static')
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-webpack']
+    serverless.service.custom = {
+      localDevStaticFolder: '/static'
+    }
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.staticFolder).equal(expectedPath)
+  })
+
+  it('should not host static files if the config is not present', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-webpack']
+    if (serverless.service) delete serverless.service.custom
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.staticFolder).equal(false)
   })
 })
