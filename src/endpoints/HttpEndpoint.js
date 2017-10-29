@@ -1,6 +1,5 @@
 'use strict'
 
-const path = require('path')
 const Endpoint = require('./Endpoint')
 
 class HttpEndpoint extends Endpoint {
@@ -11,8 +10,8 @@ class HttpEndpoint extends Endpoint {
       httpConfig = {method: s[0], path: s[1]}
     }
     this.method = httpConfig.method
-    this.resourcePath = httpConfig.path.replace(/\{([a-zA-Z_]+)\}/g, ':$1')
-    this.path = path.join('/http', this.resourcePath)
+    this.resourcePath = httpConfig.path.replace(/\{([a-zA-Z_]+)\}/g, ':$1').replace(/(^\/|\/$)/g, '')
+    this.path = this.resourcePath.length ? '/http/' + this.resourcePath : '/http'
   }
 
   getLambdaEvent (request) {
