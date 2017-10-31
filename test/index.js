@@ -244,4 +244,23 @@ describe('index.js', () => {
     alexaDevServer.hooks['local-dev-server:start']()
     expect(alexaDevServer.server.staticFolder).equal(false)
   })
+
+  it('should prefix the paths if the basePath is present', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-domain-manager']
+    serverless.service.custom = {
+      customDomain: {basePath: 'members'}
+    }
+    let expectedPath = '/http/' + serverless.service.custom.customDomain.basePath;
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.functions[0].endpoints[0].path).equal(expectedPath)
+  })
 })
