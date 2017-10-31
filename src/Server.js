@@ -56,9 +56,21 @@ class Server {
       let handlerPath = Array.isArray(serverlessConfig.plugins) && serverlessConfig.plugins.includes('serverless-webpack')
         ? path.join(servicePath, '/.webpack/service', handlerSrcFile)
         : path.join(servicePath, handlerSrcFile)
+      let config = serverlessConfig.functions[name]
+      if (Array.isArray(serverlessConfig.plugins) && serverlessConfig.plugins.includes('serverless-domain-manager')) {
+        if (serverlessConfig.custom && serverlessConfig.custom.customDomain && serverlessConfig.custom.customDomain.basePath) {
+          if (config && config.events) {
+            config.events.forEach(event => {
+              if (event && event.http && typeof event.http.path === 'string') {
+                event.http.path = serverlessConfig.custom.customDomain.basePath.replace(/\/$/g, '') + '/' + event.http.path.replace(/^\//g, '')
+              }
+            })
+          }
+        }
+      }
       return {
         name: name,
-        config: serverlessConfig.functions[name],
+        config: config,
         handlerModulePath: handlerPath,
         handlerFunctionName,
         environment: Object.assign({}, serverlessConfig.provider.environment, functionConfig.environment, this.customEnvironment)
