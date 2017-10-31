@@ -9,13 +9,16 @@ class AlexaSkillEndpoint extends Endpoint {
     this.method = 'POST'
     this.path = `/alexa-skill/${this.name}`
   }
+
   getLambdaEvent (request) {
     // Pass-through
     return request.body
   }
+
   handleLambdaSuccess (response, result) {
     response.send(result)
   }
+
   toString () {
     return `Alexa-Skill: ${this.name}`
   }
