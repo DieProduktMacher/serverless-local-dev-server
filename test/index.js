@@ -123,6 +123,25 @@ describe('index.js', () => {
     )
   })
 
+  it('should start a server with a custom port and accept requests', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: 'GET /'}]
+      }
+    }
+    serverless.service.custom = {
+      localDevPort: '5007'
+    }
+
+    alexaDevServer = new AlexaDevServer(serverless)
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    return sendHttpGetRequest(5007, '').then(result =>
+      expect(result.ok).equal(true)
+    )
+  })
+
   it('should set environment variables correctly', () => {
     serverless.service.provider.environment = {
       foo: 'bar',
@@ -256,7 +275,7 @@ describe('index.js', () => {
     serverless.service.custom = {
       customDomain: {basePath: 'members'}
     }
-    let expectedPath = '/http/' + serverless.service.custom.customDomain.basePath;
+    let expectedPath = '/http/' + serverless.service.custom.customDomain.basePath
 
     alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
     alexaDevServer.hooks['local-dev-server:loadEnvVars']()

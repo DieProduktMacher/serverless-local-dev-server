@@ -45,9 +45,11 @@ functions:
 plugins:
   - "@kalarrs/serverless-local-dev-server"
 
-# if needed add folder for serving static files if necessary (relative to service path)
 custom:
+  # optional: add folder for serving static files (relative to service path)
   localDevStaticFolder: path/to/static/files
+  # optional: set the port the server starts on
+  localDevPort: 5000
 ```
 
 
@@ -62,6 +64,11 @@ On default the server listens on port 5005. You can specify another one with the
 
 ```sh
 serverless local-dev-server --port 5000
+```
+
+You can also set the port in the serverless.yml
+```yaml
+  localDevPort: 5000
 ```
 
 To automatically restart the server when files change, you may use nodemon:
