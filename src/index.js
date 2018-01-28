@@ -30,6 +30,8 @@ class ServerlessLocalDevServerPlugin {
   start () {
     this.server = new Server()
     this.server.log = this.serverless.cli.log.bind(this.serverless.cli)
+    if (this.serverless.service.provider.profile) this.server.customEnvironment.AWS_PROFILE = this.serverless.service.provider.profile
+    if (this.serverless.service.provider.region) this.server.customEnvironment.AWS_REGION = this.serverless.service.provider.region
     Object.assign(this.server.customEnvironment, this.options.environment)
     this.server.setConfiguration(this.serverless.service, this.serverless.config.servicePath)
     let customPort = this.serverless.service && this.serverless.service.custom && this.serverless.service.custom.localDevPort
