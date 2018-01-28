@@ -8,6 +8,7 @@ const sinon = require('sinon')
 const Serverless = require('serverless/lib/Serverless')
 const AwsProvider = require('serverless/lib/plugins/aws/provider/awsProvider')
 const AlexaDevServer = require('../src')
+const path = require('path')
 
 chai.use(chaiAsPromised)
 const expect = chai.expect
@@ -44,12 +45,14 @@ describe('index.js', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create()
     serverless = new Serverless()
-    serverless.init()
-    serverless.setProvider('aws', new AwsProvider(serverless))
-    serverless.config.servicePath = __dirname
+    return serverless.init().then(() => {
+      serverless.setProvider('aws', new AwsProvider(serverless))
+      serverless.config.servicePath = __dirname
+    })
   })
 
   afterEach((done) => {
+    if (alexaDevServer && alexaDevServer.server && alexaDevServer.server.server) alexaDevServer.server.server.close()
     sandbox.restore()
     done()
   })
@@ -63,19 +66,19 @@ describe('index.js', () => {
     serverless.service.functions = {
       'MyAlexaSkill': {
         handler: 'lambda-handler.alexaSkill',
-        events: [ 'alexaSkill' ]
+        events: ['alexaSkill']
       },
       'MyHttpResource': {
         handler: 'lambda-handler.httpGet',
-        events: [ { http: { method: 'GET', path: '/' } } ]
+        events: [{http: {method: 'GET', path: '/'}}]
       },
       'MyHttpResourceID': {
         handler: 'lambda-handler.httpGet',
-        events: [ { http: { method: 'GET', path: '/:id' } } ]
+        events: [{http: {method: 'GET', path: '/:id'}}]
       },
       'MyShorthandHttpResource': {
         handler: 'lambda-handler.httpPost',
-        events: [ { http: 'POST shorthand' } ]
+        events: [{http: 'POST shorthand'}]
       }
     }
     alexaDevServer = new AlexaDevServer(serverless)
@@ -109,10 +112,10 @@ describe('index.js', () => {
     serverless.service.functions = {
       'MyHttpResource': {
         handler: 'lambda-handler.httpGet',
-        events: [ { http: 'GET /' } ]
+        events: [{http: 'GET /'}]
       }
     }
-    alexaDevServer = new AlexaDevServer(serverless, { port: 5006 })
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5006})
     alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return sendHttpGetRequest(5006, '').then(result =>
@@ -120,7 +123,28 @@ describe('index.js', () => {
     )
   })
 
+  it('should start a server with a custom port and accept requests', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: 'GET /'}]
+      }
+    }
+    serverless.service.custom = {
+      localDevPort: '5007'
+    }
+
+    alexaDevServer = new AlexaDevServer(serverless)
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    return sendHttpGetRequest(5007, '').then(result =>
+      expect(result.ok).equal(true)
+    )
+  })
+
   it('should set environment variables correctly', () => {
+    serverless.service.provider.profile = 'default';
+    serverless.service.provider.region = 'us-west-2';
     serverless.service.provider.environment = {
       foo: 'bar',
       bla: 'blub',
@@ -129,14 +153,14 @@ describe('index.js', () => {
     serverless.service.functions = {
       'MyAlexaSkill': {
         handler: 'lambda-handler.mirrorEnv',
-        events: [ 'alexaSkill' ],
+        events: ['alexaSkill'],
         environment: {
           foo: 'baz'
         }
       }
     }
     let options = {
-      environment: { la: 'lala' },
+      environment: {la: 'lala'},
       port: 5007
     }
     alexaDevServer = new AlexaDevServer(serverless, options)
@@ -149,7 +173,8 @@ describe('index.js', () => {
       expect(json.IS_LOCAL).equal(true)
       expect(json.foo).equal('baz')
       expect(json.bla).equal('blub')
-      expect(json.la).equal('lala')
+      expect(json.AWS_PROFILE).equal('default')
+      expect(json.AWS_REGION).equal('us-west-2')
     })
   })
 
@@ -157,10 +182,10 @@ describe('index.js', () => {
     serverless.service.functions = {
       'SomeFunction': {
         handler: 'lambda-handler.none',
-        events: [ 'blub' ]
+        events: ['blub']
       }
     }
-    alexaDevServer = new AlexaDevServer(serverless, { port: 5008 })
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5008})
     alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     // Expect rejection of request as no server is running on port 5008
@@ -171,14 +196,14 @@ describe('index.js', () => {
     serverless.service.functions = {
       'MyAlexaSkill': {
         handler: 'lambda-handler.fail',
-        events: [ 'alexaSkill' ]
+        events: ['alexaSkill']
       },
       'MyHttpResource': {
         handler: 'lambda-handler.fail',
-        events: [ { http: 'GET /' } ]
+        events: [{http: 'GET /'}]
       }
     }
-    alexaDevServer = new AlexaDevServer(serverless, { port: 5009 })
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
     alexaDevServer.hooks['local-dev-server:loadEnvVars']()
     alexaDevServer.hooks['local-dev-server:start']()
     return Promise.all([
@@ -189,5 +214,75 @@ describe('index.js', () => {
         expect(result.ok).equal(false)
       )
     ])
+  })
+
+  it('should look in the .webpack/service folder when webpack plugin is present', () => {
+    let expectedPath = path.join(__dirname, '.webpack/service', 'lambda-handler')
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-webpack']
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.functions[0].handlerModulePath).equal(expectedPath)
+  })
+
+  it('should host static files if the config is present', () => {
+    let expectedPath = path.join(__dirname, '/static')
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-webpack']
+    serverless.service.custom = {
+      localDevStaticFolder: '/static'
+    }
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.staticFolder).equal(expectedPath)
+  })
+
+  it('should not host static files if the config is not present', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-webpack']
+    if (serverless.service) delete serverless.service.custom
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.staticFolder).equal(false)
+  })
+
+  it('should prefix the paths if the basePath is present', () => {
+    serverless.service.functions = {
+      'MyHttpResource': {
+        handler: 'lambda-handler.httpGet',
+        events: [{http: {method: 'GET', path: '/'}}]
+      }
+    }
+    serverless.service.plugins = ['serverless-domain-manager']
+    serverless.service.custom = {
+      customDomain: {basePath: 'members'}
+    }
+    let expectedPath = '/http/' + serverless.service.custom.customDomain.basePath
+
+    alexaDevServer = new AlexaDevServer(serverless, {port: 5009})
+    alexaDevServer.hooks['local-dev-server:loadEnvVars']()
+    alexaDevServer.hooks['local-dev-server:start']()
+    expect(alexaDevServer.server.functions[0].endpoints[0].path).equal(expectedPath)
   })
 })
