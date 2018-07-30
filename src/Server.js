@@ -79,6 +79,7 @@ class Server {
       this.log(`${endpoint}`)
       // Execute Lambda with corresponding event, forward response to Express
       let lambdaEvent = endpoint.getLambdaEvent(request)
+      lambdaEvent.path = endpoint.resourcePath
       this._executeLambdaHandler(func, lambdaEvent).then(result => {
         this.log(' ➡ Success')
         if (process.env.SLS_DEBUG) console.info(result)
