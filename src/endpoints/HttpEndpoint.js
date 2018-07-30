@@ -12,14 +12,19 @@ class HttpEndpoint extends Endpoint {
     }
     this.method = httpConfig.method
     this.resourcePath = httpConfig.path.replace(/\{([a-zA-Z_]+)\}/g, ':$1')
-    this.path = path.join('/http', this.resourcePath)
+    this.resource = httpConfig.path
+    this.path = path.posix.join('/http', this.resourcePath)
   }
   getLambdaEvent (request) {
+    const pathParameters = request.params || {}
+    const path = this.resourcePath.replace(/:([a-zA-Z_]+)/g, (param) => pathParameters[param.substr(1)])
     return {
       httpMethod: request.method,
       body: JSON.stringify(request.body, null, '  '),
       queryStringParameters: request.query,
-      pathParameters: request.params || {}
+      pathParameters,
+      path,
+      resource: this.resource
     }
   }
   handleLambdaSuccess (response, result) {
