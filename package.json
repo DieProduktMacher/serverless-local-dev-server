@@ -1,8 +1,8 @@
 {
   "name": "serverless-local-dev-server",
-  "version": "0.2.4",
+  "version": "0.3.1",
   "engines": {
-    "node": ">=6.0"
+    "node": ">=6.10"
   },
   "description": "Develop Alexa-Skill and HTTP functions in Serverless without deploying to AWS",
   "author": "DieProduktMacher <www.dieproduktmacher.com>",
