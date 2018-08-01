@@ -12,7 +12,11 @@ class ServerlessLocalDevServerPlugin {
         usage: 'Runs a local dev server for Alexa-Skill and HTTP functions',
         lifecycleEvents: [ 'loadEnvVars', 'start' ],
         options: {
-          port: { usage: 'Port to listen on', shortcut: 'p' }
+          port: { usage: 'Port to listen on', shortcut: 'p' },
+          https: { usage: 'Enable HTTPS via port 8443' },
+          'https-cert': { usage: 'Path to cert file to use for HTTPS server' },
+          'https-key': { usage: 'Path to key file to use for HTTPS server' },
+          'https-passphrase': { usage: 'Passphrase for HTTPS server cert file' }
         }
       }
     }
@@ -32,7 +36,15 @@ class ServerlessLocalDevServerPlugin {
     server.log = this.serverless.cli.log.bind(this.serverless.cli)
     Object.assign(server.customEnvironment, this.options.environment)
     server.setConfiguration(this.serverless.service, this.serverless.config.servicePath)
-    server.start(this.options.port || 5005)
+    let httpsOptions = false;
+    if ( this.options.https ) {
+      httpsOptions = {
+        certPath: this.options[ 'https-cert' ],
+        keyPath: this.options[ 'https-key' ],
+        passphrase: this.options[ 'https-passphrase' ]
+      }
+    }
+    server.start(this.options.port || 5005, httpsOptions)
   }
 }
 
