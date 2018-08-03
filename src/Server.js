@@ -5,6 +5,7 @@ const BodyParser = require('body-parser')
 const path = require('path')
 const dotenv = require('dotenv')
 const getEndpoints = require('./endpoints/get')
+const cookieParser = require('cookie-parser')
 
 class Server {
   constructor () {
@@ -23,6 +24,7 @@ class Server {
     }
     this.app = Express()
     this.app.use(BodyParser.json())
+    this.app.use(cookieParser())
     this.functions.forEach(func =>
       func.endpoints.forEach(endpoint => this._attachEndpoint(func, endpoint))
     )
