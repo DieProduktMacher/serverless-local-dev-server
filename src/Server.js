@@ -29,6 +29,14 @@ class Server {
     if (this.staticFolder) {
       this.app.use('/static', Express.static(this.staticFolder))
     }
+
+    this.app.use(function (req, res, next) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      next()
+    })
+
     this.app.listen(port, _ => {
       this.log(`Listening on port ${port} for requests 🚀`)
       this.log('----')
