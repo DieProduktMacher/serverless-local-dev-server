@@ -18,13 +18,18 @@ class HttpEndpoint extends Endpoint {
   getLambdaEvent (request) {
     const pathParameters = request.params || {}
     const path = this.resourcePath.replace(/:([a-zA-Z_]+)/g, (param) => pathParameters[param.substr(1)])
+    let headers = {};
+    if ( request.get("Cookie") ) {
+      headers.Cookie = request.get( "Cookie" );
+    }
     return {
       httpMethod: request.method,
       body: JSON.stringify(request.body, null, '  '),
       queryStringParameters: request.query,
       pathParameters,
       path,
-      resource: this.resource
+      resource: this.resource,
+      headers
     }
   }
   handleLambdaSuccess (response, result) {

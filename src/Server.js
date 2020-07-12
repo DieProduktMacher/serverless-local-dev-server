@@ -5,6 +5,7 @@ const BodyParser = require('body-parser')
 const path = require('path')
 const dotenv = require('dotenv')
 const getEndpoints = require('./endpoints/get')
+const cookieParser = require('cookie-parser')
 
 class Server {
   constructor () {
@@ -16,13 +17,14 @@ class Server {
     this.processEnvironment = Object.assign({}, process.env)
   }
   // Starts the server
-  start (port) {
+  start (port, httpsOptions) {
     if (this.functions.length === 0) {
       this.log('No Lambdas with Alexa-Skill or HTTP events found')
       return
     }
     this.app = Express()
     this.app.use(BodyParser.json())
+    this.app.use(cookieParser())
     this.functions.forEach(func =>
       func.endpoints.forEach(endpoint => this._attachEndpoint(func, endpoint))
     )
@@ -45,6 +47,16 @@ class Server {
       }
       this.log('----')
     })
+    if ( httpsOptions ) {
+      const https = require('https');
+      const fs = require('fs');
+      const options = {
+          cert: fs.readFileSync(httpsOptions.certPath),
+          key: fs.readFileSync(httpsOptions.keyPath),
+          passphrase: httpsOptions.passphrase
+      }
+      https.createServer(options, this.app).listen(8443)
+    }
   }
   // Sets functions, including endpoints, using the serverless config and service path
   setConfiguration (serverlessConfig, servicePath) {
