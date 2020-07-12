@@ -1,7 +1,7 @@
 Serverless Local Dev Server Plugin (Beta)
 =======
 
-[![Build Status](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server.svg?branch=develop)](https://travis-ci.org/DieProduktMacher/serverless-local-dev-server)
+DEPRECATED: Please use the official Serverless offline plugin instead: https://www.npmjs.com/package/serverless-offline
 
 This plugin exposes Alexa-Skill and HTTP events as local HTTP endpoints, removing the need to deploy every code change to AWS Lambda. You can connect these endpoints to Alexa, Facebook Messenger or other services via forwardhq, ngrok or any other forwarding service.
 
