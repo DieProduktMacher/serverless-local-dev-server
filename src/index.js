@@ -12,7 +12,7 @@ class ServerlessLocalDevServerPlugin {
         usage: 'Runs a local dev server for Alexa-Skill and HTTP functions',
         lifecycleEvents: [ 'loadEnvVars', 'start' ],
         options: {
-          port: { usage: 'Port to listen on', shortcut: 'p' }
+          port: { usage: 'Port to listen on', shortcut: 'p', type:'string' }
         }
       }
     }
